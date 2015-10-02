@@ -1,12 +1,15 @@
+using Distributions
+srand(123)
+
 function iterate(p_i,q,psi,N::Int=1000)
-  w_i = zeros(N);
+  w = zeros(N);
   sum = 0.0;
+  theta = rand(N);
   for i in 1:N
-    theta_n = calc_theta(i);
-    w_i = p_i(theta_n)/q(theta_n,psi);
-    sum += w_i;
+    w[i] = exp(logpdf(p_i,theta[i])-logpdf(q,theta[i]));
+    sum += w[i];
   end
-  w = w_i/sum;
+  w_norm = w[i]/sum;
   delete_comp(q);
   merge_comp(q);
   add_comp(q);
@@ -21,3 +24,12 @@ function main_func(p::Array,q,big_i::Int=1000)
     i++
   end
 end
+
+# setup q
+
+for i in 1:N
+  q = q.+((1/N).*TDist(i/N,N))
+end
+
+
+
