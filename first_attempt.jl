@@ -4,7 +4,7 @@ srand(123)
 function iterate(p_i,q,psi,N::Int=1000)
   w = zeros(N);
   sum = 0.0;
-  theta = rand(N);
+  theta = rand(q,N);
   for i in 1:N
     w[i] = exp(logpdf(p_i,theta[i])-logpdf(q,theta[i]));
     sum += w[i];
