@@ -43,6 +43,8 @@ function build_psi(alpha::Array{Float64,1}=ones(10)./10,df::Array{Int8,1}=ones(I
 end
 
 function update_comp(theta,w,psi,dim::Int=1) #add types
+  epsilon = zeros(length(psi[:,1]),length(theta));
+  alpha_prime = zeros(length(psi[:,1]));
   for i in 1:length(psi[:,1])
     for j in 1:length(theta)
       epsilon[i,j] = psi[i,1]*pdf(psi[i,4],theta[j])*length(theta)/theta[j]; #also could be wrong
@@ -52,6 +54,5 @@ function update_comp(theta,w,psi,dim::Int=1) #add types
   end
   return build_psi(alpha_prime,psi[:,2],psi[:,3])
 end
-
 
 
