@@ -26,10 +26,13 @@ function main_func(p::Array,q,big_i::Int=1000)
 end
 
 # setup q
-
+M=10
+df=2
+N=1000
+q = TDist[]
 for i in 1:N
-  q = q.+((1/N).*TDist(i/N,N))
+  q=vcat(q,TDist(df))
 end
-
-
-
+alpha = ones(N)./N
+#for i in 1:M
+#big_q = alpha[1] +
