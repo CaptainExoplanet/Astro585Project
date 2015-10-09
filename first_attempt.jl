@@ -6,18 +6,16 @@ function iterate(p_i,psi::Array{4},N::Int=1000)
   sum = 0.0;
   theta = zeros(N);
   for i in 1:N
-    for j in 1:lenght(psi[:,1])
-      sum += psi[j,2]
-  #theta = rand(q,N);
-  for i in 1:N
-    w[i] = exp(logpdf(p_i,theta[i])-logpdf(q,theta[i]));
+    theta[i] = cumsum(psi[:,1].*rand(psi[:,4])); #This might be wrong
+    density_func = cumsum(psi[:,1].*pdf(psi[:,4],theta[i]));
+    w[i] = exp(logpdf(p_i,theta[i])-log(density_func));
     sum += w[i];
   end
   w_norm = w[i]/sum;
-  delete_comp(q);
-  merge_comp(q);
-  add_comp(q);
-  new_psi = update_comp(q);
+  #delete_comp(q);
+  #merge_comp(q);
+  #add_comp(q);
+  new_psi = update_comp(w_norm,psi);
   return new_psi;
 end
 
@@ -31,9 +29,9 @@ end
 
 # setup psi
 function build_psi(alpha::Array{Float64,1}=ones(10)./10,df::Array{Int8,1}=ones(Int8,10).*2,x::Array{Float64,1}=[1.,2.,3.,4.,5.,6.,7.,8.,9.,10.])
-  q = TDist[]
+  q = Normal[]
   for i in 1:length(df)
-    q=vcat(q,TDist(df[i]))
+    q=vcat(q,Normal(x[i],df[i]))
   end
   psi = [alpha df x q]
 end
