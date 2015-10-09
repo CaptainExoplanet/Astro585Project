@@ -27,16 +27,10 @@ end
 
 # setup q
 function build_psi(alpha::Array{Float64,1}=ones(10)./10,df::Array{Int8,1}=ones(Int8,10).*2,x::Array{Float64,1}=[1.,2.,3.,4.,5.,6.,7.,8.,9.,10.])
-  psi = [alpha df x]
+  q = TDist[]
+  for i in 1:length(df)
+    q=vcat(q,TDist(df[i]))
+  end
+  psi = [alpha df x q]
 end
 
-psi = build_psi()
-
-M=10
-df=2
-N=1000
-q = TDist[]
-for i in 1:N
-  q=vcat(q,TDist(df))
-end
-alpha = ones(N)./N
