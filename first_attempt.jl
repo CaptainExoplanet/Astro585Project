@@ -26,6 +26,12 @@ function main_func(p::Array,q,big_i::Int=1000)
 end
 
 # setup q
+function build_psi(alpha::Array{Float64,1}=ones(10)./10,df::Array{Int8,1}=ones(Int8,10).*2,x::Array{Float64,1}=[1.,2.,3.,4.,5.,6.,7.,8.,9.,10.])
+  psi = [alpha df x]
+end
+
+psi = build_psi()
+
 M=10
 df=2
 N=1000
@@ -34,5 +40,3 @@ for i in 1:N
   q=vcat(q,TDist(df))
 end
 alpha = ones(N)./N
-#for i in 1:M
-#big_q = alpha[1] +
