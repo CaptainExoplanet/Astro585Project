@@ -1,8 +1,11 @@
+# In one dimension for now
+
 using Distributions
 srand(123)
 
 function iterate(p_i,psi::Array{4},N::Int=1000)
   w = zeros(N);
+  w_norm = zeros(N);
   sum = 0.0;
   theta = zeros(N);
   for i in 1:N
@@ -11,11 +14,13 @@ function iterate(p_i,psi::Array{4},N::Int=1000)
     w[i] = exp(logpdf(p_i,theta[i])-log(density_func));
     sum += w[i];
   end
-  w_norm = w[i]/sum;
+  for i in 1:N
+    w_norm[i] = w[i]/sum;
+  end
   #delete_comp(q);
   #merge_comp(q);
   #add_comp(q);
-  new_psi = update_comp(w_norm,psi);
+  new_psi = update_comp(theta,w_norm,psi);
   return new_psi;
 end
 
@@ -35,4 +40,17 @@ function build_psi(alpha::Array{Float64,1}=ones(10)./10,df::Array{Int8,1}=ones(I
   end
   psi = [alpha df x q]
 end
+
+function update_comp(theta,w,psi) #add types
+  for i in 1:length(psi[:,1])
+    for j in 1:length(theta)
+      epsilon[i,j] = psi[i,1]*pdf(psi[i,4],theta[j])*length(theta)/theta[j]; #also could be wrong
+      alpha_prime[i] += pdf(psi[i,4],theta[j])*epsilon[i,j]
+      #x_prime[i] += stuff
+    end
+  end
+  return build_psi(alpha_prime,psi[:,2],x_prime)
+end
+
+
 
