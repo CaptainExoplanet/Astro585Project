@@ -55,4 +55,5 @@ function update_comp(theta,w,psi,dim::Int=1) #add types
   return build_psi(alpha_prime,psi[:,2],psi[:,3])
 end
 
-cd("$(homedir())/Astro585Project/")
+
+
