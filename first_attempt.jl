@@ -67,7 +67,7 @@ function update_comp(theta,w,psi::Array{Any,2},dim::Int=1) #add types
   alpha_prime = zeros(length(psi[:,1]));
   for i in 1:length(psi[:,1])
     for j in 1:length(theta)
-      epsilon[i,j] = psi[i,1]*pdf(psi[i,4],theta[j])*length(theta)/theta[j]; #also could be wrong
+      epsilon[i,j] = psi[i,1]*pdf(psi[i,4],theta[j])*length(theta)/theta[j];
       alpha_prime[i] += pdf(psi[i,4],theta[j])*epsilon[i,j]
       #should have an x_prime and sigma calculation here
     end
