@@ -24,15 +24,6 @@ function iterate(p_i,psi::Array{4},N::Int=1000)
   return new_psi;
 end
 
-function main_func(p::Array,q,big_i::Int=1000)
-  i=2
-  psi = build_psi();
-  while i<big_i
-    psi = iterate(p,psi)
-    i++
-  end
-end
-
 # setup psi
 function build_psi(alpha::Array{Float64,1}=ones(10)./10,df::Array{Int8,1}=ones(Int8,10).*2,x::Array{Float64,1}=[1.,2.,3.,4.,5.,6.,7.,8.,9.,10.])
   q = Normal[];
@@ -42,18 +33,37 @@ function build_psi(alpha::Array{Float64,1}=ones(10)./10,df::Array{Int8,1}=ones(I
   psi = [alpha df x q];
 end
 
-function update_comp(theta,w,psi,dim::Int=1) #add types
+function update_comp(theta,w,psi::Array{4},dim::Int=1) #add types
   epsilon = zeros(length(psi[:,1]),length(theta));
   alpha_prime = zeros(length(psi[:,1]));
   for i in 1:length(psi[:,1])
     for j in 1:length(theta)
       epsilon[i,j] = psi[i,1]*pdf(psi[i,4],theta[j])*length(theta)/theta[j]; #also could be wrong
       alpha_prime[i] += pdf(psi[i,4],theta[j])*epsilon[i,j]
-      #should have an x_prime calculation here
+      #should have an x_prime and sigma calculation here
     end
   end
   return build_psi(alpha_prime,psi[:,2],psi[:,3])
 end
 
+function test_simple(N::Int=100)
+  psi=build_psi();
+  p=Normal(5,3)
+  for i in 1:N
+    psi=iterate(p,psi);
+  end
+  return psi;
+end
 
+test_simple()
+
+
+
+#Tests with kepler planet are below. These don't work yet.
+#cd("$(homedir())/Astro585Project/TTVFaster/Julia/benchmark")
+#include("TTVFaster/Julia/test_ttv.jl")
+#data=readdlm("$(homedir())/Astro585Project/TTVFaster/Julia/kepler62ef_planets.txt",',',Float64)
+#data=vec(data)
+#ttv1,ttv2=test_ttv(5,40,20,data)
+#include("TTVFaster/Julia/benchmark/benchmark_grad_ttv.jl")
 
