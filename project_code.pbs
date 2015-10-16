@@ -1,0 +1,15 @@
+#!/bin/tcsh
+#PBS -l nodes=1
+#PBS -l walltime=0:30:00
+#PBS -l pmem=1gb
+#PBS -j oe
+#PBS -m abe
+#PBS -M jmjacks66@gmail.com
+
+module purge
+module load git
+module load julia/0.3.11_483dbf5279
+
+cd $PBS_O_WORKDIR
+
+julia 
