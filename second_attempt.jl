@@ -1,9 +1,3 @@
-#= This module provides functions that complete the algorithm described in Liu (2014). For now, it is only
-in one dimension with normal distributions, but should really be multivariate and use student's t-distributions.
-Additionally, there is no deletion, addition, or merging yet. There is one example of a test at the bottom of
-the page.
-=#
-
 using Distributions
 srand(123)
 
@@ -17,7 +11,7 @@ srand(123)
      - Functions called:
        -update_comp()
 =#
-function iterate(p_i,psi::Array{Any,2},N::Int64=1000)
+function iterate(p_i,psi::Matrix,N::Int64=1000)
   w = zeros(N);
   w_norm = zeros(N);
   sum = 0.0;
@@ -25,10 +19,10 @@ function iterate(p_i,psi::Array{Any,2},N::Int64=1000)
   density_func = 0.0
   for i in 1:N
     for j in 1:length(psi[:,1])
-      theta[i] += psi[j,1]*rand(psi[j,4]);
+      theta[i] += psi[j,1]*rand(psi[j,5]);
     end
     for j in 1:length(psi[:,1])
-      density_func += psi[j,1]*pdf(psi[j,4],theta[i]);
+      density_func += psi[j,1]*pdf(psi[j,5],theta[i]);
     end
     w[i] = exp(logpdf(p_i,theta[i])-log(density_func));
     sum += w[i];
@@ -44,15 +38,18 @@ function iterate(p_i,psi::Array{Any,2},N::Int64=1000)
 end
 
 # This function initializes psi as a 2-dimensional array of varying types
-function build_psi(alpha::Array{Float64,1}=ones(10)./10,df::Array{Any,1}=ones(Int8,10).*2,x::Array{Any,1}=[1.,2.,3.,4.,5.,6.,7.,8.,9.,10.])
-  q = Normal[];
+function build_psi(alpha::Array{Float64,1}=ones(5)./10,df::Array{Float64,1}=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4.],[5.,6.],[7.,8.],[9.,10.]],sigma=Matrix[[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.]])
+  q = MvTDist[];
   for i in 1:length(df)
-    q=vcat(q,Normal(x[i],df[i]));
+    q=vcat(q,MvTDist(df[i],vec(x[i]),sigma[i]));
   end
-  psi = [alpha df x q];
+  psi = [alpha df x sigma q];
 end
 
-#= This function updates the components of psi as desribed in Liu (2014) section 3.4
+psi=build_psi()
+psi[:,1]
+
+""" This function updates the components of psi as desribed in Liu (2014) section 3.4
      - Inputs:
        -a random sample from the mixture distribution
        -an array of psi containing the mixture distribution
@@ -60,8 +57,8 @@ end
      - Outputs:
        -An updated version of psi
      - Functions called:
-       -build_psi=#
-
+       -build_psi
+"""
 function update_comp(theta,w,psi::Array{Any,2},dim::Int=1) #add types
   epsilon = zeros(length(psi[:,1]),length(theta));
   alpha_prime = zeros(length(psi[:,1]));
@@ -76,7 +73,7 @@ function update_comp(theta,w,psi::Array{Any,2},dim::Int=1) #add types
 end
 
 #Testing my functions
-build_psi()
+psi=build_psi()
 p=Normal(5,3)
 for i in 1:10
   psi=iterate(p,psi,1000);
@@ -91,3 +88,4 @@ psi
 #data=vec(data)
 #ttv1,ttv2=test_ttv(5,40,20,data)
 #include("TTVFaster/Julia/benchmark/benchmark_grad_ttv.jl")
+
