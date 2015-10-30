@@ -1,30 +1,29 @@
 using Distributions
 srand(123)
 
-#= This function iterates psi as desribed in Liu (2014) section 3
-     - Inputs:
-       -a density funtion for the target population
-       -an array of psi containing the mixture distribution
-       -The number of iterations
-     - Outputs:
-       -An updated version of psi
-     - Functions called:
-       -update_comp()
-=#
 function iterate(p_i,psi::Matrix,N::Int64=1000)
   w = zeros(N);
   w_norm = zeros(N);
   sum = 0.0;
-  theta = zeros(N);
+  theta = [];
   density_func = 0.0
   for i in 1:N
     for j in 1:length(psi[:,1])
-      theta[i] += psi[j,1]*rand(psi[j,5]);
+      print(j)
+      if j==1
+        if i==1
+          theta = vcat(theta,psi[j,1]*rand(psi[j,5]));
+        else
+          heta = hcat(theta,psi[j,1]*rand(psi[j,5]));
+        end
+      else
+        theta[i] = theta[i] .+ psi[j,1]*rand(psi[j,5]);
+      end
     end
     for j in 1:length(psi[:,1])
-      density_func += psi[j,1]*pdf(psi[j,5],theta[i]);
+      density_func += psi[j,1]*pdf(psi[j,5],vec(theta[:,i]));
     end
-    w[i] = exp(logpdf(p_i,theta[i])-log(density_func));
+    w[i] = exp(logpdf(p_i,theta[:,i])-log(density_func));
     sum += w[i];
   end
   for i in 1:N
@@ -47,18 +46,12 @@ function build_psi(alpha::Array{Float64,1}=ones(5)./10,df::Array{Float64,1}=ones
 end
 
 psi=build_psi()
-psi[:,1]
+bs=[]
+bs=vcat(bs,psi[2,1]*rand(psi[2,5]))
+bs=hcat(bs,psi[2,1]*rand(psi[2,5]))
+bs=hcat(bs,psi[2,1]*rand(psi[2,5]))
+bs[1,2]
 
-""" This function updates the components of psi as desribed in Liu (2014) section 3.4
-     - Inputs:
-       -a random sample from the mixture distribution
-       -an array of psi containing the mixture distribution
-       -The dimensions of the problem
-     - Outputs:
-       -An updated version of psi
-     - Functions called:
-       -build_psi
-"""
 function update_comp(theta,w,psi::Array{Any,2},dim::Int=1) #add types
   epsilon = zeros(length(psi[:,1]),length(theta));
   alpha_prime = zeros(length(psi[:,1]));
@@ -74,12 +67,13 @@ end
 
 #Testing my functions
 psi=build_psi()
-p=Normal(5,3)
+bs=linspace(1,2,2)
+bss=[bs bs]
+p=MvNormal([3.,4.],bss)
 for i in 1:10
   psi=iterate(p,psi,1000);
 end
 psi
-
 
 #Tests with kepler planet are below. These don't work yet.
 #cd("$(homedir())/Astro585Project/TTVFaster/Julia/benchmark")
