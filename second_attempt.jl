@@ -1,29 +1,31 @@
 using Distributions
 srand(123)
 
-function iterate(p_i,psi::Matrix,N::Int64=1000)
+function iterate(p,psi::Matrix,N::Int64=1000)
   w = zeros(N);
   w_norm = zeros(N);
   sum = 0.0;
   theta = [];
-  density_func = 0.0
+  density_func = 0.0;
+  lamda=linspace(0,1,10)
   for i in 1:N
     for j in 1:length(psi[:,1])
-      print(j)
       if j==1
         if i==1
           theta = vcat(theta,psi[j,1]*rand(psi[j,5]));
         else
-          heta = hcat(theta,psi[j,1]*rand(psi[j,5]));
+          theta = hcat(theta,psi[j,1]*rand(psi[j,5]));
         end
       else
-        theta[i] = theta[i] .+ psi[j,1]*rand(psi[j,5]);
+        theta[:,i] = theta[:,i] .+ psi[j,1]*rand(psi[j,5]);
       end
     end
     for j in 1:length(psi[:,1])
       density_func += psi[j,1]*pdf(psi[j,5],vec(theta[:,i]));
     end
-    w[i] = exp(logpdf(p_i,theta[:,i])-log(density_func));
+    for k in 1:length(lamda)
+      w[i] += exp(lamda[k]*logpdf(p,theta[:,i])+(1-lamda[k])*log(pdf(psi[1,5],vec(theta[:,i])))-log(density_func));
+    end
     sum += w[i];
   end
   for i in 1:N
@@ -53,15 +55,25 @@ bs=hcat(bs,psi[2,1]*rand(psi[2,5]))
 bs[1,2]
 
 function update_comp(theta,w,psi::Array{Any,2},dim::Int=1) #add types
-  epsilon = zeros(length(psi[:,1]),length(theta));
+  epsilon = zeros(length(psi[:,1]),length(theta[1,:]));
   alpha_prime = zeros(length(psi[:,1]));
-  for i in 1:length(psi[:,1])
-    for j in 1:length(theta)
-      epsilon[i,j] = psi[i,1]*pdf(psi[i,4],theta[j])*length(theta)/theta[j];
-      alpha_prime[i] += pdf(psi[i,4],theta[j])*epsilon[i,j]
-      #should have an x_prime and sigma calculation here
+  density_func = 0.0;
+  #Expectation
+  for i in 1:length(theta[1,:])
+    for j in 1:length(psi[:,1])
+      density_func += psi[j,1]*pdf(psi[j,5],vec(theta[:,i]));
+    end
+    for j in 1:length(psi[:,1])
+      epsilon[i,j] = psi[j,1]*pdf(psi[j,5],vec(theta[:,i]))/density_func;
+      alpha_prime[j] += pdf(psi[j,5],vec(theta[:,i]))*epsilon[i,j]
     end
   end
+  #for j in 1:length(theta[1,:])
+    #for i in 1:length(psi[:,1])
+      #Maximization
+      #should have an x_prime and sigma calculation here
+    #end
+  #end
   return build_psi(alpha_prime/sum(alpha_prime),psi[:,2],psi[:,3])
 end
 
