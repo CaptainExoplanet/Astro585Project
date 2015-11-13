@@ -8,7 +8,7 @@ function iterate(p,psi::Matrix,N::Int64=1000)
   theta = [];
   density_func = 0.0;
   lamda=linspace(0,1,10)
-  for i in 1:N
+  sum = @parallel (+) for i in 1:N
     for j in 1:length(psi[:,1])
       if j==1
         if i==1
@@ -26,11 +26,9 @@ function iterate(p,psi::Matrix,N::Int64=1000)
     for k in 1:length(lamda)
       w[i] += exp(lamda[k]*logpdf(p,theta[:,i])+(1-lamda[k])*log(pdf(psi[1,5],vec(theta[:,i])))-log(density_func));
     end
-    sum += w[i];
+    w[i];
   end
-  for i in 1:N
-    w_norm[i] = w[i]/sum;
-  end
+  w_norm = w/sum;
   #delete_comp(q);
   #merge_comp(q);
   #add_comp(q);
@@ -84,8 +82,8 @@ function update_comp(theta,w,psi::Array{Any,2},dim::Int=1) #add types
   x_prime = zeros(length(psi[:,3]));
   #Expectation
   for j in 1:length(psi[:,1])
-    for i in 1:length(theta[1,:])
-      alpha_prime[j] += pdf(psi[j,5],vec(theta[:,i]))*epsilon[j,i];
+    alpha_prime[j] = @parallel (+) for i in 1:length(theta[1,:])
+      pdf(psi[j,5],vec(theta[:,i]))*epsilon[j,i];
     end
   end
   #Maximization
@@ -94,11 +92,17 @@ function update_comp(theta,w,psi::Array{Any,2},dim::Int=1) #add types
     bottom_x = 0.0;
     top_sig = 0.0;
     bottom_sig = 0.0;
-    for i in 1:length(theta[1,:])
-      top_x += w[i]*epsilon[j,i]*u_m[i]*theta[j,i];
-      bottom_x += w[i]*epsilon[j,i]*u_m[i];
-      top_sig += w[i]*epsilon[j,i]*u_m*C_n[i];
-      bottom_sig += w[i]*epsilon[j,i];
+    top_x = @parallel (+) for i in 1:length(theta[1,:])
+       w[i]*epsilon[j,i]*u_m[i]*theta[j,i];
+    end
+    bottom_x = @parallel (+) for i in 1:length(theta[1,:])
+       w[i]*epsilon[j,i]*u_m[i];
+    end
+    top_sig = @parallel (+) for i in 1:length(theta[1,:])
+      w[i]*epsilon[j,i]*u_m*C_n[i];
+    end
+    bottom_sig = @parallel (+) for i in 1:length(theta[1,:])
+      w[i]*epsilon[j,i];
     end
     x_prime[j]=top_x/bottom_x;
     sig_prime[j]=top_sig/bottom_sig;
@@ -123,4 +127,3 @@ psi
 #data=vec(data)
 #ttv1,ttv2=test_ttv(5,40,20,data)
 #include("TTVFaster/Julia/benchmark/benchmark_grad_ttv.jl")
-
