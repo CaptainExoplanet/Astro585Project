@@ -68,7 +68,11 @@ end
 
 #not finished product
 function calc_u_m(psi,theta)
-  return ones(length(psi[:,1]));
+  u_m = zeros(length(psi[:,1]));
+  for j in 1:length(psi[:,1])
+    u_m[j] = (psi[j,2]+length(psi[:,1]))/(psi[j,2]+(theta[j,:].-psi[j,3])*psi[j,4]*(theta[j,:].-psi[j,3]));
+  end
+  return u_m;
 end
 
 #not finished product
