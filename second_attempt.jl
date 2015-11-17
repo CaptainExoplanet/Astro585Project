@@ -1,4 +1,3 @@
-Pkg.add("Distributions")
 using Distributions
 srand(123)
 
