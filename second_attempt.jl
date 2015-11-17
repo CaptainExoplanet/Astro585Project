@@ -1,3 +1,4 @@
+Pkg.add("Distributions")
 using Distributions
 srand(123)
 
@@ -46,13 +47,6 @@ function build_psi(alpha=ones(5)./10,df=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4
   end
   psi = [alpha df x sigma q];
 end
-
-psi=build_psi()
-bs=[]
-bs=vcat(bs,psi[2,1]*rand(psi[2,5]))
-bs=hcat(bs,psi[2,1]*rand(psi[2,5]))
-bs=hcat(bs,psi[2,1]*rand(psi[2,5]))
-bs[1,:]
 
 function calc_epsilon(psi,theta)
   epsilon = zeros(length(psi[:,1]),length(theta[1,:]));
@@ -111,10 +105,9 @@ psi=build_psi()
 bs=linspace(1,2,2)
 bss=[bs bs]
 p=MvNormal([3.,4.],bss)
-for i in 1:10
+@time for i in 1:10
   psi=iterate(p,psi,1000);
 end
-psi
 
 
 #Tests with kepler planet are below. These don't work yet.
