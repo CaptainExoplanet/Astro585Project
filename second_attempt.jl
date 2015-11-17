@@ -39,7 +39,7 @@ function iterate(p,psi::Matrix,N::Int64=1000)
 end
 
 # This function initializes psi as a 2-dimensional array of varying types
-function build_psi(alpha::Array{Float64,1}=ones(5)./10,df::Array{Float64,1}=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4.],[5.,6.],[7.,8.],[9.,10.]],sigma=Matrix[[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.]])
+function build_psi(alpha=ones(5)./10,df=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4.],[5.,6.],[7.,8.],[9.,10.]],sigma=Matrix[[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.]])
   q = MvTDist[];
   for i in 1:length(df)
     q=vcat(q,MvTDist(df[i],vec(x[i]),sigma[i]));
@@ -74,18 +74,13 @@ function calc_u_m(psi,theta)
   return u_m;
 end
 
-function calc_C_n(psi,theta)
-  C_n = zeros(length(psi[:,1]));
-  for j in 1:length(psi[:,1])
-    C_n[j] = (theta.-psi[j,3])*(theta.-psi[j,3])'
-  end
-  return C_n;
-end
+calc_C_n(psi,theta,j) = (theta.-psi[j,3])*(theta.-psi[j,3])'
 
 function update_comp(theta,w,psi::Array{Any,2},dim::Int=1) #add types
   epsilon = calc_epsilon(psi,theta);
   alpha_prime = zeros(length(psi[:,1]));
-  x_prime = zeros(length(psi[:,3]));
+  x_prime = Array(Array,length(psi[:,1]));
+  sig_prime = Array(Matrix,length(psi[:,1]));
   #Expectation
   for j in 1:length(psi[:,1])
     for i in 1:length(theta[1,:])
@@ -96,12 +91,13 @@ function update_comp(theta,w,psi::Array{Any,2},dim::Int=1) #add types
   for j in 1:length(psi[:,1])
     top_x = 0.0;
     bottom_x = 0.0;
-    top_sig = 0.0;
+    top_sig = Array(Float64,2,2);
+    top_sig = top_sig.*0.0;
     bottom_sig = 0.0;
     for i in 1:length(theta[1,:])
       top_x += w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i])[j].*theta[:,i];
       bottom_x += w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i])[j];
-      top_sig += w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i])[j].*calc_C_n(psi,theta[:,i]);
+      top_sig += w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i])[j].*calc_C_n(psi,theta[:,i],j);
       bottom_sig += w[i]*epsilon[j,i];
     end
     x_prime[j]=top_x./bottom_x;
@@ -119,6 +115,7 @@ for i in 1:10
   psi=iterate(p,psi,1000);
 end
 psi
+
 
 #Tests with kepler planet are below. These don't work yet.
 #cd("$(homedir())/Astro585Project/TTVFaster/Julia/benchmark")
