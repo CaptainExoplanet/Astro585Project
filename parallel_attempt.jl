@@ -1,4 +1,13 @@
-using Distributions
+nprocs()
+addprocs(3)
+proclist = workers()         # Get list of workers
+
+# test that can use tasks on all workers
+for proc in proclist
+  println("Julia says welcome from proc ",proc," w/ hostname ",@fetchfrom(proc,gethostname() ))
+end
+
+@everywhere using Distributions
 srand(123)
 
 function iterate(p,psi::Matrix,N::Int64=1000)
@@ -37,20 +46,13 @@ function iterate(p,psi::Matrix,N::Int64=1000)
 end
 
 # This function initializes psi as a 2-dimensional array of varying types
-function build_psi(alpha::Array{Float64,1}=ones(5)./10,df::Array{Float64,1}=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4.],[5.,6.],[7.,8.],[9.,10.]],sigma=Matrix[[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.]])
+function build_psi(alpha=ones(5)./10,df=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4.],[5.,6.],[7.,8.],[9.,10.]],sigma=Matrix[[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.]])
   q = MvTDist[];
   for i in 1:length(df)
     q=vcat(q,MvTDist(df[i],vec(x[i]),sigma[i]));
   end
   psi = [alpha df x sigma q];
 end
-
-psi=build_psi()
-bs=[]
-bs=vcat(bs,psi[2,1]*rand(psi[2,5]))
-bs=hcat(bs,psi[2,1]*rand(psi[2,5]))
-bs=hcat(bs,psi[2,1]*rand(psi[2,5]))
-bs[1,2]
 
 function calc_epsilon(psi,theta)
   epsilon = zeros(length(psi[:,1]),length(theta[1,:]));
@@ -64,22 +66,21 @@ function calc_epsilon(psi,theta)
   return epsilon/density_func;
 end
 
-#not finished product
-function calc_u_m(psi,theta)
-  return ones(length(psi[:,1]));
+@everywhere function calc_u_m(psi,theta)
+  u_m = zeros(length(psi[:,1]));
+  for j in 1:length(psi[:,1])
+    u_m[j] = (psi[j,2]+length(psi[:,1]))/(psi[j,2]+reshape((theta.-psi[j,3])'*psi[j,4]*(theta.-psi[j,3]),1)[1]);
+  end
+  return u_m;
 end
 
-#not finished product
-function calc_C_n(psi,theta)
-  return ones(vec(psi[:,4])); #needs fixing
-end
+@everywhere calc_C_n(psi,theta,j) = (theta.-psi[j,3])*(theta.-psi[j,3])'
 
 function update_comp(theta,w,psi::Array{Any,2},dim::Int=1) #add types
   epsilon = calc_epsilon(psi,theta);
-  u_m = calc_u_m(psi,theta);
-  C_n = calc_C_n(psi,theta);
   alpha_prime = zeros(length(psi[:,1]));
-  x_prime = zeros(length(psi[:,3]));
+  x_prime = Array(Array,length(psi[:,1]));
+  sig_prime = Array(Matrix,length(psi[:,1]));
   #Expectation
   for j in 1:length(psi[:,1])
     alpha_prime[j] = @parallel (+) for i in 1:length(theta[1,:])
@@ -90,22 +91,23 @@ function update_comp(theta,w,psi::Array{Any,2},dim::Int=1) #add types
   for j in 1:length(psi[:,1])
     top_x = 0.0;
     bottom_x = 0.0;
-    top_sig = 0.0;
+    top_sig = Array(Float64,2,2);
+    top_sig = top_sig.*0.0;
     bottom_sig = 0.0;
     top_x = @parallel (+) for i in 1:length(theta[1,:])
-       w[i]*epsilon[j,i]*u_m[i]*theta[j,i];
+      w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i])[j].*theta[:,i];
     end
     bottom_x = @parallel (+) for i in 1:length(theta[1,:])
-       w[i]*epsilon[j,i]*u_m[i];
+      w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i])[j];
     end
     top_sig = @parallel (+) for i in 1:length(theta[1,:])
-      w[i]*epsilon[j,i]*u_m*C_n[i];
+      w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i])[j].*calc_C_n(psi,theta[:,i],j);
     end
     bottom_sig = @parallel (+) for i in 1:length(theta[1,:])
       w[i]*epsilon[j,i];
     end
-    x_prime[j]=top_x/bottom_x;
-    sig_prime[j]=top_sig/bottom_sig;
+    x_prime[j]=top_x./bottom_x;
+    sig_prime[j]=top_sig./bottom_sig;
   end
   return build_psi(alpha_prime/sum(alpha_prime),psi[:,2],x_prime,sig_prime);
 end
@@ -115,10 +117,10 @@ psi=build_psi()
 bs=linspace(1,2,2)
 bss=[bs bs]
 p=MvNormal([3.,4.],bss)
-for i in 1:10
+@time for i in 1:10
   psi=iterate(p,psi,1000);
 end
-psi
+
 
 #Tests with kepler planet are below. These don't work yet.
 #cd("$(homedir())/Astro585Project/TTVFaster/Julia/benchmark")
