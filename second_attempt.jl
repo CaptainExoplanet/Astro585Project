@@ -49,14 +49,13 @@ end
 
 function calc_epsilon(psi,theta)
   epsilon = zeros(length(psi[:,1]),length(theta[1,:]));
-  density_func = 0.0;
   for i in 1:length(theta[1,:])
     for j in 1:length(psi[:,1])
-      density_func += psi[j,1]*pdf(psi[j,5],vec(theta[:,i]));
       epsilon[j,i] = psi[j,1]*pdf(psi[j,5],vec(theta[:,i]));
     end
+    epsilon[:,i] = epsilon[:,i]/sum(epsilon[:,i])
   end
-  return epsilon/density_func;
+  return epsilon
 end
 
 function calc_u_m(psi,theta)
@@ -69,18 +68,22 @@ end
 
 calc_C_n(psi,theta,j) = (theta.-psi[j,3])*(theta.-psi[j,3])'
 
-function update_comp(theta,w,psi::Array{Any,2},dim::Int=1) #add types
+function expectation(psi,theta)
   epsilon = calc_epsilon(psi,theta);
+  println(epsilon)
   alpha_prime = zeros(length(psi[:,1]));
-  x_prime = Array(Array,length(psi[:,1]));
-  sig_prime = Array(Matrix,length(psi[:,1]));
-  #Expectation
   for j in 1:length(psi[:,1])
     for i in 1:length(theta[1,:])
       alpha_prime[j] += pdf(psi[j,5],vec(theta[:,i]))*epsilon[j,i];
     end
   end
-  #Maximization
+  return alpha_prime;
+end
+
+function maximization(psi,theta,w)
+  epsilon = calc_epsilon(psi,theta);
+  x_prime = Array(Array,length(psi[:,1]));
+  sig_prime = Array(Matrix,length(psi[:,1]));
   for j in 1:length(psi[:,1])
     top_x = 0.0;
     bottom_x = 0.0;
@@ -96,6 +99,14 @@ function update_comp(theta,w,psi::Array{Any,2},dim::Int=1) #add types
     x_prime[j]=top_x./bottom_x;
     sig_prime[j]=top_sig./bottom_sig;
   end
+  return x_prime,sig_prime
+end
+
+function update_comp(theta,w,psi::Array{Any,2}) #add types
+  #Expectation
+  alpha_prime = expectation(psi,theta);
+  #Maximization
+  x_prime,sig_prime = maximization(psi,theta,w)
   return build_psi(alpha_prime/sum(alpha_prime),psi[:,2],x_prime,sig_prime);
 end
 
@@ -107,7 +118,14 @@ p=MvNormal([3.,4.],bss)
 @time for i in 1:10
   psi=iterate(p,psi,1000);
 end
+psi
 
+function test_e_step(psi)
+  theta = [1. 2. 1. 2.;2. 3. 2. 3.];
+  a = expectation(psi,theta);
+end
+
+#### Epsilon is not returning the right thing. Fix this. ####
 
 #Tests with kepler planet are below. These don't work yet.
 #cd("$(homedir())/Astro585Project/TTVFaster/Julia/benchmark")
