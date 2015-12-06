@@ -51,6 +51,7 @@ function calc_epsilon(psi,theta)
   epsilon = zeros(length(psi[:,1]),length(theta[1,:]));
   for i in 1:length(theta[1,:])
     for j in 1:length(psi[:,1])
+      println(psi[j,1])
       epsilon[j,i] = psi[j,1]*pdf(psi[j,5],vec(theta[:,i]));
     end
     epsilon[:,i] = epsilon[:,i]/sum(epsilon[:,i])
@@ -70,14 +71,13 @@ calc_C_n(psi,theta,j) = (theta.-psi[j,3])*(theta.-psi[j,3])'
 
 function expectation(psi,theta)
   epsilon = calc_epsilon(psi,theta);
-  println(epsilon)
   alpha_prime = zeros(length(psi[:,1]));
   for j in 1:length(psi[:,1])
     for i in 1:length(theta[1,:])
       alpha_prime[j] += pdf(psi[j,5],vec(theta[:,i]))*epsilon[j,i];
     end
   end
-  return alpha_prime;
+  return alpha_prime/sum(alpha_prime);
 end
 
 function maximization(psi,theta,w)
@@ -107,12 +107,26 @@ function update_comp(theta,w,psi::Array{Any,2}) #add types
   alpha_prime = expectation(psi,theta);
   #Maximization
   x_prime,sig_prime = maximization(psi,theta,w)
-  return build_psi(alpha_prime/sum(alpha_prime),psi[:,2],x_prime,sig_prime);
+  return build_psi(alpha_prime,psi[:,2],x_prime,sig_prime);
 end
 
 #Testing my functions
+function test_e_step()
+  psi = build_psi();
+  theta = [1. 3. 5. 7.;2. 4. 6. 8.];
+  a_prime = expectation(psi,theta);
+  #is_approx_equal
+end
+
+function test_m_step(w)
+  psi = build_psi();
+  theta = [1. 3. 5. 7.;2. 4. 6. 8.];
+  x_prime,s_prime = maximization(psi,theta,w);
+  #is approx_equal
+end
+
 psi=build_psi()
-bs=linspace(1,2,2)
+bs=linspace(9,10,2)
 bss=[bs bs]
 p=MvNormal([3.,4.],bss)
 @time for i in 1:10
@@ -120,12 +134,11 @@ p=MvNormal([3.,4.],bss)
 end
 psi
 
-function test_e_step(psi)
-  theta = [1. 2. 1. 2.;2. 3. 2. 3.];
-  a = expectation(psi,theta);
-end
+test_e_step()
+test_m_step()
 
-#### Epsilon is not returning the right thing. Fix this. ####
+
+
 
 #Tests with kepler planet are below. These don't work yet.
 #cd("$(homedir())/Astro585Project/TTVFaster/Julia/benchmark")
