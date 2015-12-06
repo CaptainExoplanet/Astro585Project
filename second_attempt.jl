@@ -39,7 +39,7 @@ function iterate(p,psi::Matrix,N::Int64=1000)
 end
 
 # This function initializes psi as a 2-dimensional array of varying types
-function build_psi(alpha=ones(5)./10,df=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4.],[5.,6.],[7.,8.],[9.,10.]],sigma=Matrix[[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.]])
+function build_psi(alpha=ones(5)./5,df=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4.],[5.,6.],[7.,8.],[9.,10.]],sigma=Matrix[[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.]])
   q = MvTDist[];
   for i in 1:length(df)
     q=vcat(q,MvTDist(df[i],vec(x[i]),sigma[i]));
@@ -59,13 +59,7 @@ function calc_epsilon(psi,theta)
   return epsilon
 end
 
-function calc_u_m(psi,theta)
-  u_m = zeros(length(psi[:,1]));
-  for j in 1:length(psi[:,1])
-    u_m[j] = (psi[j,2]+length(psi[:,1]))/(psi[j,2]+reshape((theta.-psi[j,3])'*psi[j,4]*(theta.-psi[j,3]),1)[1]);
-  end
-  return u_m;
-end
+calc_u_m(psi,theta,j) = (psi[j,2]+length(psi[:,1]))/(psi[j,2]+reshape((theta.-psi[j,3])'*psi[j,4]*(theta.-psi[j,3]),1)[1])
 
 calc_C_n(psi,theta,j) = (theta.-psi[j,3])*(theta.-psi[j,3])'
 
@@ -91,9 +85,9 @@ function maximization(psi,theta,w)
     top_sig = top_sig.*0.0;
     bottom_sig = 0.0;
     for i in 1:length(theta[1,:])
-      top_x += w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i])[j].*theta[:,i];
-      bottom_x += w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i])[j];
-      top_sig += w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i])[j].*calc_C_n(psi,theta[:,i],j);
+      top_x += w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i],j).*theta[:,i];
+      bottom_x += w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i],j);
+      top_sig += w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i],j).*calc_C_n(psi,theta[:,i],j);
       bottom_sig += w[i]*epsilon[j,i];
     end
     x_prime[j]=top_x./bottom_x;
@@ -121,21 +115,21 @@ end
 function test_m_step(w)
   psi = build_psi();
   theta = [1. 3. 5. 7.;2. 4. 6. 8.];
-  x_prime,s_prime = maximization(psi,theta,w);
+  return x_prime,s_prime = maximization(psi,theta,w);
   #is approx_equal
 end
 
 psi=build_psi()
-bs=linspace(9,10,2)
+bs=linspace(2,3,2)
 bss=[bs bs]
-p=MvNormal([3.,4.],bss)
-@time for i in 1:10
+p=MvNormal([9.,10.],bss)
+@time for i in 1:100
   psi=iterate(p,psi,1000);
 end
 psi
 
 test_e_step()
-test_m_step()
+test_m_step([.2,.2,.2,.2])
 
 
 
