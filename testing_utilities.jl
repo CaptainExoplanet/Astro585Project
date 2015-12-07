@@ -2,7 +2,17 @@ println("Hello World")
 
 using Distributions
 using Base.Test
-include("$(homedir())/Astro585Project/serial_version.jl")
+#include("$(homedir())/Astro585Project/serial_version.jl")
+include("$(homedir())/Astro585Project/parallel_version.jl")
+
+nprocs()
+addprocs(1)
+proclist = workers()
+
+# test that can use tasks on all workers
+for proc in proclist
+  println("Julia says welcome from proc ",proc," w/ hostname ",@fetchfrom(proc,gethostname() ))
+end
 
 function test_e_step()
   psi = build_psi();
@@ -51,4 +61,6 @@ end
 
 srand(123)
 @time test_run_algorithm_2D(1000,10000,0.1)
+
+@time test_e_step()
 
