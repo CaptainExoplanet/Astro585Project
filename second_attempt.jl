@@ -104,6 +104,12 @@ function update_comp(theta,w,psi::Array{Any,2}) #add types
   return build_psi(alpha_prime,psi[:,2],x_prime,sig_prime);
 end
 
+function run_algorithm(psi=build_psi(),p=MvNormal([9.,10.],[2. 2.;3. 3.]),iterations::Int64=100,samples::Int64`=1000)
+  for i in 1:iterations
+    psi=iterate(p,psi,samples)
+  end
+end
+
 #Testing my functions
 function test_e_step()
   psi = build_psi();
