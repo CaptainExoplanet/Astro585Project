@@ -1,7 +1,9 @@
 using Distributions
+using Base.Test
 srand(123)
 
 function iterate(p,psi::Matrix,N::Int64=1000)
+  @assert N>0;
   w = zeros(N);
   w_norm = zeros(N);
   sum = 0.0;
@@ -31,9 +33,6 @@ function iterate(p,psi::Matrix,N::Int64=1000)
   for i in 1:N
     w_norm[i] = w[i]/sum;
   end
-  #delete_comp(q);
-  #merge_comp(q);
-  #add_comp(q);
   new_psi = update_comp(theta,w_norm,psi);
   return new_psi;
 end
@@ -51,7 +50,6 @@ function calc_epsilon(psi,theta)
   epsilon = zeros(length(psi[:,1]),length(theta[1,:]));
   for i in 1:length(theta[1,:])
     for j in 1:length(psi[:,1])
-      println(psi[j,1])
       epsilon[j,i] = psi[j,1]*pdf(psi[j,5],vec(theta[:,i]));
     end
     epsilon[:,i] = epsilon[:,i]/sum(epsilon[:,i])
@@ -81,7 +79,7 @@ function maximization(psi,theta,w)
   for j in 1:length(psi[:,1])
     top_x = 0.0;
     bottom_x = 0.0;
-    top_sig = Array(Float64,2,2);
+    top_sig = Array(Float64,length(theta[:,1]),length(theta[:,1]));
     top_sig = top_sig.*0.0;
     bottom_sig = 0.0;
     for i in 1:length(theta[1,:])
@@ -104,35 +102,69 @@ function update_comp(theta,w,psi::Array{Any,2}) #add types
   return build_psi(alpha_prime,psi[:,2],x_prime,sig_prime);
 end
 
-function run_algorithm(psi=build_psi(),p=MvNormal([9.,10.],[2. 2.;3. 3.]),iterations::Int64=100,samples::Int64`=1000)
+function run_algorithm(psi=build_psi(),p=MvNormal([3.,4.],[2. 2.;3. 3.]),iterations::Int64=100,samples::Int64=1000)
+  @assert iterations>0;
+  @assert samples>0;
   for i in 1:iterations
-    psi=iterate(p,psi,samples)
+    psi=iterate(p,psi,samples);
   end
+  return psi;
 end
 
-#Testing my functions
+#### Testing my functions ####
+
 function test_e_step()
   psi = build_psi();
   theta = [1. 3. 5. 7.;2. 4. 6. 8.];
   a_prime = expectation(psi,theta);
-  #is_approx_equal
+  @test_approx_eq_eps(a_prime[5],0.0,0.1);
 end
 
 function test_m_step(w)
+  @assert length(w)==4;
   psi = build_psi();
   theta = [1. 3. 5. 7.;2. 4. 6. 8.];
-  return x_prime,s_prime = maximization(psi,theta,w);
-  #is approx_equal
+  x_prime,s_prime = maximization(psi,theta,w);
+  @test x_prime[5][1]<psi[5,3][1];
+end
+
+function test_run_algorithm_2D(iterations::Int64=100,samples::Int64=1000,epsilon::Float64=0.1)
+  @assert iterations>0;
+  @assert samples>0;
+  test_index=1;
+  psi=run_algorithm(build_psi(),MvNormal([3.,4.],[2. 2.; 3. 3.]),iterations,samples);
+  for i in 1:length(psi[:,1])
+    if psi[i,1]>psi[test_index,1]
+      test_index = i;
+    end
+  end
+  @test_approx_eq_eps(psi[test_index,3][1],3.0,epsilon);
+end
+
+function test_run_algorithm_3D(iterations::Int64=100,samples::Int64=1000,epsilon::Float64=0.1)
+  @assert iterations>0;
+  @assert samples>0;
+  test_index=1;
+  psi=build_psi(ones(5)./5,ones(Float64,5).*2,Array[[1.,2.,3.],[3.,4.,5.],[5.,6.,7.],[7.,8.,9.],[9.,10.,11.]],Matrix[[3. 2. 1.; 3. 2. 1.; 3. 2. 1.],[3. 2. 1.; 3. 2. 1.; 3. 2. 1.],[3. 2. 1.; 3. 2. 1.; 3. 2. 1.],[3. 2. 1.; 3. 2. 1.; 3. 2. 1.],[3. 2. 1.; 3. 2. 1.; 3. 2. 1.]]);
+  psi=run_algorithm(psi,MvNormal([3.,4.,5.],[2. 2. 2.; 3. 3. 3.; 4. 4. 4.]),iterations,samples);
+  for i in 1:length(psi[:,1])
+    if psi[i,1]>psi[test_index,1]
+      test_index = i;
+    end
+  end
+  @test_approx_eq_eps(psi[test_index,3][1],3.0,epsilon);
 end
 
 psi=build_psi()
 bs=linspace(2,3,2)
 bss=[bs bs]
 p=MvNormal([9.,10.],bss)
-@time for i in 1:100
-  psi=iterate(p,psi,1000);
+@time for i in 1:10
+  psi=iterate(p,psi,100);
 end
 psi
+
+@time test_run_algorithm_2D(10,100,1.0)
 
 test_e_step()
 test_m_step([.2,.2,.2,.2])
