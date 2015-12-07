@@ -172,8 +172,6 @@ test_e_step()
 test_m_step([.2,.2,.2,.2])
 
 
-
-
 #Tests with kepler planet are below. These don't work yet.
 #cd("$(homedir())/Astro585Project/TTVFaster/Julia/benchmark")
 #include("TTVFaster/Julia/test_ttv.jl")
