@@ -1,7 +1,7 @@
+println("Hello World")
+
 using Distributions
 using Base.Test
-srand(123)
-
 include("$(homedir())/Astro585Project/serial_version.jl")
 
 function test_e_step()
@@ -48,5 +48,7 @@ function test_run_algorithm_3D(iterations::Int64=100,samples::Int64=1000,epsilon
   @test_approx_eq_eps(psi[test_index,3][1],3.0,epsilon);
 end
 
+
+srand(123)
 @time test_run_algorithm_2D(1000,10000,0.1)
 
