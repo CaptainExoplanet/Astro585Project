@@ -48,5 +48,5 @@ function test_run_algorithm_3D(iterations::Int64=100,samples::Int64=1000,epsilon
   @test_approx_eq_eps(psi[test_index,3][1],3.0,epsilon);
 end
 
-@time test_run_algorithm_2D(1000,10000,1.0)
+@time test_run_algorithm_2D(1000,10000,0.1)
 
