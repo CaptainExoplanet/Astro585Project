@@ -21,4 +21,4 @@ cd $PBS_O_WORKDIR          # change into same directory as job was submitted fro
 # julia --machinefile $PBS_NODEFILE  ~/julia-demo-parallel.jl
 
 # start julia and run julia commands in the subsequent filename (you'll need to copy/create that file in the directory you submit this job from)
-julia serial_version.jl
+julia testing_utilities.jl
