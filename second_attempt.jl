@@ -131,6 +131,7 @@ end
 function test_run_algorithm_2D(iterations::Int64=100,samples::Int64=1000,epsilon::Float64=0.1)
   @assert iterations>0;
   @assert samples>0;
+  @assert epsilon>0;
   test_index=1;
   psi=run_algorithm(build_psi(),MvNormal([3.,4.],[2. 2.; 3. 3.]),iterations,samples);
   for i in 1:length(psi[:,1])
@@ -144,8 +145,9 @@ end
 function test_run_algorithm_3D(iterations::Int64=100,samples::Int64=1000,epsilon::Float64=0.1)
   @assert iterations>0;
   @assert samples>0;
+  @assert epsilon>0;
   test_index=1;
-  psi=build_psi(ones(5)./5,ones(Float64,5).*2,Array[[1.,2.,3.],[3.,4.,5.],[5.,6.,7.],[7.,8.,9.],[9.,10.,11.]],Matrix[[3. 2. 1.; 3. 2. 1.; 3. 2. 1.],[3. 2. 1.; 3. 2. 1.; 3. 2. 1.],[3. 2. 1.; 3. 2. 1.; 3. 2. 1.],[3. 2. 1.; 3. 2. 1.; 3. 2. 1.],[3. 2. 1.; 3. 2. 1.; 3. 2. 1.]]);
+  psi=build_psi(ones(5)./5,ones(Float64,5).*2,Array[[3.,4.,5.],[3.,4.,5.],[3.,4.,5.],[3.,4.,5.],[3.,4.,5.]],Matrix[[3. 2. 1.; 3. 2. 1.; 3. 2. 1.],[3. 2. 1.; 3. 2. 1.; 3. 2. 1.],[3. 2. 1.; 3. 2. 1.; 3. 2. 1.],[3. 2. 1.; 3. 2. 1.; 3. 2. 1.],[3. 2. 1.; 3. 2. 1.; 3. 2. 1.]]);
   psi=run_algorithm(psi,MvNormal([3.,4.,5.],[2. 2. 2.; 3. 3. 3.; 4. 4. 4.]),iterations,samples);
   for i in 1:length(psi[:,1])
     if psi[i,1]>psi[test_index,1]
@@ -164,7 +166,7 @@ p=MvNormal([9.,10.],bss)
 end
 psi
 
-@time test_run_algorithm_2D(10,100,1.0)
+@time test_run_algorithm_3D(10,100,1.0)
 
 test_e_step()
 test_m_step([.2,.2,.2,.2])
