@@ -1,5 +1,20 @@
+#= This module provides functions that complete a portion of the algorithm described in Liu (2014) in parallel. This
+version of the algorithm runs through the expectation and maximization steps to update the components of the proposal
+distribution. For testing purposes, see the testing_utilities_parallel.jl module.
+=#
+
 @everywhere using Distributions
 
+#= This function iterates psi as desribed in Liu (2014) section 3
+     - Inputs:
+       -a density funtion for the target population
+       -an array of psi containing the mixture distribution
+       -The number of iterations
+     - Outputs:
+       -An updated version of psi
+     - Functions called:
+       -update_comp()
+=#
 function iterate(p,psi::Matrix,N::Int64=1000)
   @assert N>0;
   w = zeros(N);
@@ -35,7 +50,15 @@ function iterate(p,psi::Matrix,N::Int64=1000)
   return new_psi;
 end
 
-# This function initializes psi as a 2-dimensional array of varying types
+#= This function initializes psi as a 2-dimensional array of varying types
+    - Inputs:
+      -an array of probability masses
+      -an array of degrees of freedom
+      -a two-dimensional array of component means
+      -an array of covariance matrices
+    - Outputs:
+      -an array of psi containing the mixture distribution
+=#
 function build_psi(alpha=ones(5)./5,df=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4.],[5.,6.],[7.,8.],[9.,10.]],sigma=Matrix[[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.]])
   q = MvTDist[];
   for i in 1:length(df)
@@ -44,6 +67,13 @@ function build_psi(alpha=ones(5)./5,df=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4.
   psi = [alpha df x sigma q];
 end
 
+#= This function calculates the posterior mass as described in Lui (2014) section 3.2
+    - Inputs:
+      -an array of psi containing the mixture distribution
+      -a random sample from the mixture distribution
+    - Ouputs:
+      -an array containing posterior masses
+=#
 @everywhere function calc_epsilon(psi,theta)
   epsilon = zeros(length(psi[:,1]),length(theta[1,:]));
   for i in 1:length(theta[1,:])
@@ -55,10 +85,35 @@ end
   return epsilon
 end
 
+#= This function calculates the u_m as described in Lui (2014) section 3.4
+    - Inputs:
+      -an array of psi containing the mixture distribution
+      -a random sample from the mixture distribution
+      -an index identifying the component of psi
+    - Ouputs:
+      -u_m (a scalar)
+=#
 @everywhere calc_u_m(psi,theta,j) = (psi[j,2]+length(psi[:,1]))/(psi[j,2]+reshape((theta.-psi[j,3])'*psi[j,4]*(theta.-psi[j,3]),1)[1])
 
+#= This function calculates the C_n as described in Lui (2014) section 3.4
+    - Inputs:
+      -an array of psi containing the mixture distribution
+      -a random sample from the mixture distribution
+      -an index identifying the component of psi
+    - Ouputs:
+      -C_n (a matrix)
+=#
 @everywhere calc_C_n(psi,theta,j) = (theta.-psi[j,3])*(theta.-psi[j,3])'
 
+#= This function updates the parameters described in the expectation section of Lui (2014) section 3.4
+    - Inputs:
+      -an array of psi containing the mixture distribution
+      -a random sample from the mixture distribution
+    - Outputs:
+      -an updated probability mass array
+    - Functions called
+      -calc_epsilon()
+=#
 function expectation(psi,theta)
   epsilon = calc_epsilon(psi,theta);
   alpha_prime = zeros(length(psi[:,1]));
@@ -70,6 +125,19 @@ function expectation(psi,theta)
   return alpha_prime/sum(alpha_prime);
 end
 
+#= This function updates the parameters described in the maximization section of Lui (2014) section 3.4
+    - Inputs:
+      -an array of psi containing the mixture distribution
+      -a random sample from the mixture distribution
+      -an array of weights representing the importance of each component of the mixture distribution
+    - Outputs:
+      -an updated mean array
+      -an updated covariance matrix array
+    - Functions called
+      -calc_epsilon()
+      -calc_u_m()
+      -calc_C_n()
+=#
 function maximization(psi,theta,w)
   epsilon = calc_epsilon(psi,theta);
   x_prime = Array(Array,length(psi[:,1]));
@@ -98,6 +166,18 @@ function maximization(psi,theta,w)
   return x_prime,sig_prime
 end
 
+#= This function updates the components of psi as desribed in Liu (2014) section 3.4
+     - Inputs:
+       -a random sample from the mixture distribution
+       -an array of weights representing the importance of each component of the mixture distribution
+       -an array of psi containing the mixture distribution
+     - Outputs:
+       -an updated version of psi
+     - Functions called:
+       -expectation()
+       -maximization()
+       -build_psi()
+=#
 function update_comp(theta,w,psi::Array{Any,2}) #add types
   #Expectation
   alpha_prime = expectation(psi,theta);
@@ -106,6 +186,17 @@ function update_comp(theta,w,psi::Array{Any,2}) #add types
   return build_psi(alpha_prime,psi[:,2],x_prime,sig_prime);
 end
 
+#= This function runs through the algorithm a number of times specified by iterations
+    - Inputs:
+      -an array of psi containing the mixture distribution
+      -a density function for the target population
+      -the number of iterations
+      -the number of samples to be taken at each iteration
+    - Outputs:
+      -a final version of psi
+    - Functions called:
+      -iterate()
+=#
 function run_algorithm(psi=build_psi(),p=MvNormal([3.,4.],[2. 2.;3. 3.]),iterations::Int64=100,samples::Int64=1000)
   @assert iterations>0;
   @assert samples>0;
