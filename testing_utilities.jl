@@ -34,13 +34,13 @@ function test_run_algorithm_2D(iterations::Int64=100,samples::Int64=1000,epsilon
   @assert samples>0;
   @assert epsilon>0;
   test_index=1;
-  psi=run_algorithm(build_psi(),MvNormal([3.,4.],[2. 2.; 3. 3.]),iterations,samples);
+  psi=run_algorithm(build_psi(),MvNormal([4.,5.],[2. 2.; 3. 3.]),iterations,samples);
   for i in 1:length(psi[:,1])
     if psi[i,1]>psi[test_index,1]
       test_index = i;
     end
   end
-  @test_approx_eq_eps(psi[test_index,3][1],3.0,epsilon);
+  @test_approx_eq_eps(psi[test_index,3][1],4.0,epsilon);
 end
 
 function test_run_algorithm_3D(iterations::Int64=100,samples::Int64=1000,epsilon::Float64=0.1)
@@ -60,7 +60,8 @@ end
 
 
 srand(123)
-@time test_run_algorithm_2D(1000,10000,0.1)
+@time test_run_algorithm_3D(10,100,1.)
 
 @time test_e_step()
+@time test_m_step([.25,.25,.25,.25])
 

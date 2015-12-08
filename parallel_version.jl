@@ -1,5 +1,4 @@
 @everywhere using Distributions
-@everywhere using Base.Test
 
 function iterate(p,psi::Matrix,N::Int64=1000)
   @assert N>0;
@@ -81,11 +80,17 @@ function maximization(psi,theta,w)
     top_sig = Array(Float64,length(theta[:,1]),length(theta[:,1]));
     top_sig = top_sig.*0.0;
     bottom_sig = 0.0;
-    for i in 1:length(theta[1,:])
-      top_x += w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i],j).*theta[:,i];
-      bottom_x += w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i],j);
-      top_sig += w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i],j).*calc_C_n(psi,theta[:,i],j);
-      bottom_sig += w[i]*epsilon[j,i];
+    top_x = @parallel (+) for i in 1:length(theta[1,:])
+      w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i],j).*theta[:,i];
+    end
+    bottom_x = @parallel (+) for i in 1:length(theta[1,:])
+      w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i],j);
+    end
+    top_sig = @parallel (+) for i in 1:length(theta[1,:])
+      w[i]*epsilon[j,i]*calc_u_m(psi,theta[:,i],j).*calc_C_n(psi,theta[:,i],j);
+    end
+    bottom_sig = @parallel (+) for i in 1:length(theta[1,:])
+      w[i]*epsilon[j,i];
     end
     x_prime[j]=top_x./bottom_x;
     sig_prime[j]=top_sig./bottom_sig;

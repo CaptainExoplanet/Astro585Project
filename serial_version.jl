@@ -1,5 +1,4 @@
 using Distributions
-using Base.Test
 
 function iterate(p,psi::Matrix,N::Int64=1000)
   @assert N>0;
