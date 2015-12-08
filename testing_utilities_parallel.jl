@@ -1,8 +1,6 @@
-nprocs()
-addprocs(1)
 proclist = workers()
 
-using Distributions
+@everywhere using Distributions
 using Base.Test
 #include("$(homedir())/Astro585Project/serial_version.jl")
 include("$(homedir())/Astro585Project/parallel_version.jl")
@@ -63,7 +61,9 @@ end
 
 srand(123)
 @time test_run_algorithm_3D(10,100,1.)
-@time test_run_algorithm_3D(10,100,1.)
+#@time test_run_algorithm_3D(10,100,1.)
 
-@time test_e_step()
-@time test_m_step([.25,.25,.25,.25])
+#@time test_e_step()
+#@time test_m_step([.25,.25,.25,.25])
+
+println("The algorithm ran successfully")
