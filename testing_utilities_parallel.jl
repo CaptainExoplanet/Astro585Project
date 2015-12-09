@@ -3,7 +3,7 @@ proclist = workers()
 @everywhere using Distributions
 using Base.Test
 
-cd("$(homedir())/Astro585Project");
+#cd("$(homedir())/Astro585Project");
 
 #include("serial_version.jl")
 include("parallel_version.jl")
