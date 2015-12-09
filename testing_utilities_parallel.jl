@@ -2,8 +2,11 @@ proclist = workers()
 
 @everywhere using Distributions
 using Base.Test
-#include("$(homedir())/Astro585Project/serial_version.jl")
-include("$(homedir())/Astro585Project/parallel_version.jl")
+
+cd("$(homedir())/Astro585Project");
+
+#include("serial_version.jl")
+include("parallel_version.jl")
 
 # test that can use tasks on all workers
 for proc in proclist

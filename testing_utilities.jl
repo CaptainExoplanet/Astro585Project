@@ -1,7 +1,10 @@
 using Distributions
 using Base.Test
-include("$(homedir())/Astro585Project/serial_version.jl")
-#include("$(homedir())/Astro585Project/parallel_version.jl")
+
+cd("$(homedir())/Astro585Project");
+
+include("serial_version.jl")
+#include("parallel_version.jl")
 
 # test that the expectation step produces an appropriate probability mass
 function test_e_step()
