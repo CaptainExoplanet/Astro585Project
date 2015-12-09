@@ -59,7 +59,7 @@ end
     - Outputs:
       -an array of psi containing the mixture distribution
 =#
-function build_psi(alpha=ones(5)./5,df=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4.],[5.,6.],[7.,8.],[9.,10.]],sigma=Matrix[[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.],[2. 1.; 2. 1.]])
+function build_psi(alpha=ones(5)./5,df=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4.],[5.,6.],[7.,8.],[9.,10.]],sigma=Matrix[[1. 0.5; 0.5 1.],[1. 0.5; 0.5 1.],[1. 0.5; 0.5 1.],[1. 0.5; 0.5 1.],[1. 0.5; 0.5 1.]])
   q = MvTDist[];
   for i in 1:length(df)
     q=vcat(q,MvTDist(df[i],vec(x[i]),sigma[i]));
