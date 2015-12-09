@@ -60,7 +60,7 @@ end
 
 
 srand(123)
-@time test_run_algorithm_3D(10,100,1.)
+@time test_run_algorithm_2D(10,100,1.)
 #@time test_run_algorithm_3D(10,100,1.)
 
 #@time test_e_step()

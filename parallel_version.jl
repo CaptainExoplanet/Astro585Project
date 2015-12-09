@@ -3,7 +3,49 @@ version of the algorithm runs through the expectation and maximization steps to 
 distribution. For testing purposes, see the testing_utilities_parallel.jl module.
 =#
 
-@everywhere using Distributions
+@everywhere begin
+
+using Distributions
+
+#= This function calculates the posterior mass as described in Lui (2014) section 3.2
+    - Inputs:
+      -an array of psi containing the mixture distribution
+      -a random sample from the mixture distribution
+    - Ouputs:
+      -an array containing posterior masses
+=#
+function calc_epsilon(psi,theta)
+  epsilon = zeros(length(psi[:,1]),length(theta[1,:]));
+  for i in 1:length(theta[1,:])
+    for j in 1:length(psi[:,1])
+      epsilon[j,i] = psi[j,1]*pdf(psi[j,5],vec(theta[:,i]));
+    end
+    epsilon[:,i] = epsilon[:,i]/sum(epsilon[:,i])
+  end
+  return epsilon
+end
+
+#= This function calculates the u_m as described in Lui (2014) section 3.4
+    - Inputs:
+      -an array of psi containing the mixture distribution
+      -a random sample from the mixture distribution
+      -an index identifying the component of psi
+    - Ouputs:
+      -u_m (a scalar)
+=#
+calc_u_m(psi,theta,j) = (psi[j,2]+length(psi[:,1]))/(psi[j,2]+reshape((theta.-psi[j,3])'*psi[j,4]*(theta.-psi[j,3]),1)[1])
+
+#= This function calculates the C_n as described in Lui (2014) section 3.4
+    - Inputs:
+      -an array of psi containing the mixture distribution
+      -a random sample from the mixture distribution
+      -an index identifying the component of psi
+    - Ouputs:
+      -C_n (a matrix)
+=#
+calc_C_n(psi,theta,j) = (theta.-psi[j,3])*(theta.-psi[j,3])'
+
+end
 
 #= This function iterates psi as desribed in Liu (2014) section 3
      - Inputs:
@@ -66,44 +108,6 @@ function build_psi(alpha=ones(5)./5,df=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4.
   end
   psi = [alpha df x sigma q];
 end
-
-#= This function calculates the posterior mass as described in Lui (2014) section 3.2
-    - Inputs:
-      -an array of psi containing the mixture distribution
-      -a random sample from the mixture distribution
-    - Ouputs:
-      -an array containing posterior masses
-=#
-@everywhere function calc_epsilon(psi,theta)
-  epsilon = zeros(length(psi[:,1]),length(theta[1,:]));
-  for i in 1:length(theta[1,:])
-    for j in 1:length(psi[:,1])
-      epsilon[j,i] = psi[j,1]*pdf(psi[j,5],vec(theta[:,i]));
-    end
-    epsilon[:,i] = epsilon[:,i]/sum(epsilon[:,i])
-  end
-  return epsilon
-end
-
-#= This function calculates the u_m as described in Lui (2014) section 3.4
-    - Inputs:
-      -an array of psi containing the mixture distribution
-      -a random sample from the mixture distribution
-      -an index identifying the component of psi
-    - Ouputs:
-      -u_m (a scalar)
-=#
-@everywhere calc_u_m(psi,theta,j) = (psi[j,2]+length(psi[:,1]))/(psi[j,2]+reshape((theta.-psi[j,3])'*psi[j,4]*(theta.-psi[j,3]),1)[1])
-
-#= This function calculates the C_n as described in Lui (2014) section 3.4
-    - Inputs:
-      -an array of psi containing the mixture distribution
-      -a random sample from the mixture distribution
-      -an index identifying the component of psi
-    - Ouputs:
-      -C_n (a matrix)
-=#
-@everywhere calc_C_n(psi,theta,j) = (theta.-psi[j,3])*(theta.-psi[j,3])'
 
 #= This function updates the parameters described in the expectation section of Lui (2014) section 3.4
     - Inputs:
