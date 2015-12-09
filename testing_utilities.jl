@@ -1,7 +1,7 @@
 using Distributions
 using Base.Test
 
-cd("$(homedir())/Astro585Project");
+#cd("$(homedir())/Astro585Project");
 
 include("serial_version.jl")
 #include("parallel_version.jl")
@@ -56,11 +56,10 @@ end
 
 
 srand(123)
-@time test_run_algorithm_2D(100,1000,1.)
-@time test_run_algorithm_3D(10,100,1.)
+@time test_run_algorithm_2D(10,100,1.)
+#@time test_run_algorithm_3D(10,100,1.)
 
-@time test_e_step()
-@time test_m_step([.25,.25,.25,.25])
+#@time test_e_step()
+#@time test_m_step([.25,.25,.25,.25])
 
-Profile.print()
 
