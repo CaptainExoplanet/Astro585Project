@@ -5,19 +5,19 @@
 include("testing_utilities.jl");
 
 #run once with small N to compile
-@time test_run_algorithm_2D(10,100,1.);
-@time test_run_algorithm_3D(10,100,1.);
+@time test_run_algorithm_2D(10,100,2.);
+@time test_run_algorithm_3D(10,100,2.);
 
 ### Test algorith at varying N in 2 dimensions ###
 
 println("Running test in 2 dimensions with 10 iterations and 100 samples");
-@time test_run_algorithm_2D(10,100,1.);
+@time test_run_algorithm_2D(10,100,2.);
 
 println("Running test in 2 dimensions with 10 iterations and 1000 samples");
-@time test_run_algorithm_2D(10,1000,1.);
+@time test_run_algorithm_2D(10,1000,2.);
 
 println("Running test in 2 dimensions with 10 iterations and 10000 samples");
-@time test_run_algorithm_2D(10,10000,1.);
+@time test_run_algorithm_2D(10,10000,2.);
 
 println("Running test in 2 dimensions with 100 iterations and 1000 samples");
 @time test_run_algorithm_2D(100,1000,1.);
@@ -35,13 +35,13 @@ println("Running test in 2 dimensions with 100000 iterations and 1000 samples");
 ### Test algorithm at varying N in 3 dimentions ###
 
 println("Running test in 3 dimensions with 10 iterations and 100 samples");
-@time test_run_algorithm_3D(10,100,1.);
+@time test_run_algorithm_3D(10,100,2.);
 
 println("Running test in 3 dimensions with 10 iterations and 1000 samples");
-@time test_run_algorithm_3D(10,1000,1.);
+@time test_run_algorithm_3D(10,1000,2.);
 
 println("Running test in 3 dimensions with 10 iterations and 10000 samples");
-@time test_run_algorithm_3D(10,10000,1.);
+@time test_run_algorithm_3D(10,10000,2.);
 
 println("Running test in 3 dimensions with 100 iterations and 1000 samples");
 @time test_run_algorithm_3D(100,1000,1.);

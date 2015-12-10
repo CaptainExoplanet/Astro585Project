@@ -52,3 +52,18 @@ function test_run_algorithm_3D(iterations::Int64=100,samples::Int64=1000,epsilon
   end
   @test_approx_eq_eps(psi[test_index,3][1],3.0,epsilon);
 end
+
+# test the accuracy of the algorithm in two dimensions
+function test_accuracy_2D(iterations::Int64=100,samples::Int64=1000)
+  @assert iterations>0;
+  @assert samples>0;
+  @assert epsilon>0;
+  test_index=1;
+  psi=run_algorithm(build_psi(),MvNormal([4.,5.],[2. 2.; 3. 3.]),iterations,samples);
+  for i in 1:length(psi[:,1])
+    if psi[i,1]>psi[test_index,1]
+      test_index = i;
+    end
+  end
+  return abs(psi[test_index,3][1]-4.0);
+end
