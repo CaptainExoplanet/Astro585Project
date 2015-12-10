@@ -2,9 +2,9 @@
 
 #cd("$(homedir())/Astro585Project");
 
-include("testing_utilities_parallel.jl");
-
 addprocs(3);
+
+include("testing_utilities_parallel.jl");
 
 #run once with small N to compile
 test_run_algorithm_2D(10,100,2.);
