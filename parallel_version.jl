@@ -107,6 +107,8 @@ function build_psi(alpha=ones(5)./5,df=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4.
     q=vcat(q,MvTDist(df[i],vec(x[i]),sigma[i]));
   end
   psi = [alpha df x sigma q];
+  @assert isreal(psi[1,3][1]);
+  return psi;
 end
 
 #= This function updates the parameters described in the expectation section of Lui (2014) section 3.4
