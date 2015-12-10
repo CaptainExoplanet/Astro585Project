@@ -57,10 +57,5 @@ function test_accuracy_2D(iterations::Int64=100,samples::Int64=1000)
   @assert samples>0;
   test_index=1;
   psi=run_algorithm(build_psi(),MvNormal([4.,5.],[2. 2.; 3. 3.]),iterations,samples);
-  for i in 1:length(psi[:,1])
-    if psi[i,1]>psi[test_index,1]
-      test_index = i;
-    end
-  end
-  return abs(psi[test_index,3][1]-4.0);
+  return abs(psi[1,3][1]*psi[1,1]+psi[2,3][1]*psi[2,1]+psi[3,3][1]*psi[3,1]+psi[4,3][1]*psi[4,1]+psi[5,3][1]*psi[5,1]-4.0);
 end
