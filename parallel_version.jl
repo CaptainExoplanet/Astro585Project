@@ -107,7 +107,9 @@ function build_psi(alpha=ones(5)./5,df=ones(Float64,5).*2,x=Array[[1.,2.],[3.,4.
     q=vcat(q,MvTDist(df[i],vec(x[i]),sigma[i]));
   end
   psi = [alpha df x sigma q];
-  @assert isreal(psi[1,3][1]);
+  for i in 1:length(df)
+    @assert isreal(psi[i,1]);
+  end
   return psi;
 end
 
@@ -126,6 +128,9 @@ function expectation(psi,theta)
   for j in 1:length(psi[:,1])
     alpha_prime[j] = @parallel (+) for i in 1:length(theta[1,:])
       pdf(psi[j,5],vec(theta[:,i]))*epsilon[j,i];
+    end
+    if isnan(alpha_prime[j])
+      alpha_prime[j] = 0.00000001
     end
   end
   return alpha_prime/sum(alpha_prime);
