@@ -129,7 +129,6 @@ function expectation(psi,theta)
       alpha_prime[j] = 0.00000001
     end
   end
-  i
   return alpha_prime/sum(alpha_prime);
 end
 
