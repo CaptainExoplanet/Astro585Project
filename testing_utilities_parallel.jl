@@ -5,11 +5,6 @@ using Base.Test
 
 include("parallel_version.jl")
 
-# test that can use tasks on all workers
-for proc in proclist
-  println("Julia says welcome from proc ",proc," w/ hostname ",@fetchfrom(proc,gethostname() ))
-end
-
 # test that the expectation step produces an appropriate probability mass
 function test_e_step()
   psi = build_psi();
