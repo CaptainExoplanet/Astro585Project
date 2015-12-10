@@ -1,7 +1,7 @@
 #!/bin/tcsh
 ## The line above instructs the computer to run this script using the tcsh interpreter.
 #PBS -l nodes=1    # requests your job to be allocated 1 processor core
-#PBS -l walltime=3:00:00   # specifies a maximum run time in format of hh:mm:ss
+#PBS -l walltime=9:00:00   # specifies a maximum run time in format of hh:mm:ss
 #PBS -l pmem=1gb           # this requests 1GB of memory per process
 #PBS -j oe                 # combine the stdout and stderr into one file
 #PBS -m abe                # send an email on abort, begin and/or exit

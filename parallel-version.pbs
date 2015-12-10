@@ -2,7 +2,7 @@
 ## The line above instructs the computer to run this script using the tcsh interpreter.
 #PBS -l nodes=4           # requests 4 processor cores which may be spread across multiple nodes (or might be on the same node)
 ##PBS -l nodes=1:ppn=4    # if uncommented, this would requests 4 processor cores on a single node
-#PBS -l walltime=3:00:00   # specifies a maximum run time in format of hh:mm:ss
+#PBS -l walltime=9:00:00   # specifies a maximum run time in format of hh:mm:ss
 #PBS -l pmem=1gb           # this requests 1GB of memory per process
 #PBS -j oe                 # combine the stdout and stderr into one file
 #PBS -m abe                # send an email on abort, begin and/or exit

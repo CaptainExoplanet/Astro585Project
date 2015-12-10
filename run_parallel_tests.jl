@@ -28,9 +28,6 @@ println("Running test in 2 dimensions with 1000 iterations and 1000 samples");
 println("Running test in 2 dimensions with 10000 iterations and 1000 samples");
 @time test_run_algorithm_2D(10000,1000,1.);
 
-println("Running test in 2 dimensions with 100000 iterations and 1000 samples");
-@time test_run_algorithm_2D(100000,1000,1.);
-
 
 ### Test algorithm at varying N in 3 dimentions ###
 
@@ -51,8 +48,5 @@ println("Running test in 3 dimensions with 1000 iterations and 1000 samples");
 
 println("Running test in 3 dimensions with 10000 iterations and 1000 samples");
 @time test_run_algorithm_3D(10000,1000,1.);
-
-println("Running test in 3 dimensions with 100000 iterations and 1000 samples");
-@time test_run_algorithm_3D(100000,1000,1.);
 
 println("All tests have been passed!");
