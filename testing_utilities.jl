@@ -55,7 +55,6 @@ end
 function test_accuracy_2D(iterations::Int64=100,samples::Int64=1000)
   @assert iterations>0;
   @assert samples>0;
-  @assert epsilon>0;
   test_index=1;
   psi=run_algorithm(build_psi(),MvNormal([4.,5.],[2. 2.; 3. 3.]),iterations,samples);
   for i in 1:length(psi[:,1])
