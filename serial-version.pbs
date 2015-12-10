@@ -14,7 +14,7 @@ module load julia/0.3.11_483dbf5279
 
 cd $PBS_O_WORKDIR          # change into same directory as job was submitted from
 
-julia testing_utilities.jl
+julia run_serial_tests.jl
 
 # If uncommented this would ask julia to ssh to each node in $PBS_NODEFILE to create a worker processes on those nodes
 #julia --machinefile $PBS_NODEFILE  testing_utilities_parallel.jl

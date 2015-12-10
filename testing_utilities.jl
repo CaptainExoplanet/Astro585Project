@@ -1,10 +1,7 @@
 using Distributions
 using Base.Test
 
-#cd("$(homedir())/Astro585Project");
-
 include("serial_version.jl")
-#include("parallel_version.jl")
 
 # test that the expectation step produces an appropriate probability mass
 function test_e_step()
@@ -53,13 +50,3 @@ function test_run_algorithm_3D(iterations::Int64=100,samples::Int64=1000,epsilon
   end
   @test_approx_eq_eps(psi[test_index,3][1],3.0,epsilon);
 end
-
-
-srand(123)
-@time test_run_algorithm_2D(10,100,1.)
-#@time test_run_algorithm_3D(10,100,1.)
-
-#@time test_e_step()
-#@time test_m_step([.25,.25,.25,.25])
-
-
