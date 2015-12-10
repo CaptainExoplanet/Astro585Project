@@ -2,7 +2,7 @@
 
 #cd("$(homedir())/Astro585Project");
 
-addprocs(3);
+#addprocs(3);
 
 include("testing_utilities_parallel.jl");
 
