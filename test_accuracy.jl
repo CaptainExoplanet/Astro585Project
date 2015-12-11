@@ -1,5 +1,3 @@
-cd("$(homedir())/Astro585Project");
-
 include("testing_utilities.jl");
 #include("testing_utilities_parallel.jl");
 
