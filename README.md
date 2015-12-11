@@ -6,4 +6,6 @@ Serial and parallel versions of the algorithm are provided in serial_version.jl 
 
 Testing functions are provided for serial and parallel code in testing_utilities.jl and testing_utilities_parallel.jl, respectively. For a simple, timed test, run run_serial_tests.jl or run_parallel_tests.jl.
 
+two files (serial-version.pbs and parallel-version.pbs) are provided for running on the lionx clusters at Penn State.
+
 Earlier versions of the code are provided in the EarlyAttempts subdirectory and can be ignored.
