@@ -14,6 +14,7 @@ using Distributions
 =#
 function calc_epsilon(psi,theta)
   @assert length(theta[1,:])>1;
+  @assert length(theta[:,1])==length(psi[1,3][:]);
   epsilon = zeros(length(psi[:,1]),length(theta[1,:]));
   for i in 1:length(theta[1,:])
     for j in 1:length(psi[:,1])
@@ -121,6 +122,7 @@ end
 =#
 function expectation(psi,theta)
   @assert length(theta[1,:])>1;
+  @assert length(theta[:,1])==length(psi[1,3][:]);
   epsilon = calc_epsilon(psi,theta);
   alpha_prime = zeros(length(psi[:,1]));
   for j in 1:length(psi[:,1])
@@ -149,6 +151,8 @@ end
 =#
 function maximization(psi,theta,w)
   @assert length(theta[1,:])>1;
+  @assert length(theta[:,1])==length(psi[1,3][:]);
+  @assert length(w)==length(theta[1,:]);
   epsilon = calc_epsilon(psi,theta);
   x_prime = Array(Array,length(psi[:,1]));
   sig_prime = Array(Matrix,length(psi[:,1]));
@@ -184,6 +188,8 @@ end
 =#
 function update_comp(theta,w,psi::Array{Any,2})
   @assert length(theta[1,:])>1;
+  @assert length(theta[:,1])==length(psi[1,3][:]);
+  @assert length(w)==length(theta[1,:]);
   #Expectation
   alpha_prime = expectation(psi,theta);
   #Maximization
