@@ -1,5 +1,6 @@
 #This file tests and benchmarks the parallel version of the algorthm at varying numbers of iterations and samples.
 
+#if running on single workstation, uncomment the following line
 #addprocs(3);
 
 include("testing_utilities_parallel.jl");
