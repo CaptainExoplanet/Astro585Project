@@ -5,7 +5,7 @@
 include("testing_utilities_parallel.jl");
 
 #run once with small N to compile
-@time test_run_algorithm_2D(10,100,2.);
+@time test_run_algorithm_2D(10,100000,2.);
 #test_run_algorithm_3D(10,100,2.);
 
 ### Test algorith at varying N in 2 dimensions ###
