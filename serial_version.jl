@@ -13,6 +13,8 @@ using Distributions
       -an array containing posterior masses
 =#
 function calc_epsilon(psi,theta)
+  @assert length(theta[1,:])>1;
+  @assert length(theta[:,1])=length(psi[1,3][:]);
   epsilon = zeros(length(psi[:,1]),length(theta[1,:]));
   for i in 1:length(theta[1,:])
     for j in 1:length(psi[:,1])
@@ -31,7 +33,7 @@ end
     - Ouputs:
       -u_m (a scalar)
 =#
-calc_u_m(psi,theta,j) = (psi[j,2]+length(psi[:,1]))/(psi[j,2]+reshape((theta.-psi[j,3])'*psi[j,4]*(theta.-psi[j,3]),1)[1])
+calc_u_m(psi,theta,j::Int64) = (psi[j,2]+length(psi[:,1]))/(psi[j,2]+reshape((theta.-psi[j,3])'*psi[j,4]*(theta.-psi[j,3]),1)[1])
 
 #= This function calculates the C_n as described in Lui (2014) section 3.4
     - Inputs:
@@ -41,7 +43,7 @@ calc_u_m(psi,theta,j) = (psi[j,2]+length(psi[:,1]))/(psi[j,2]+reshape((theta.-ps
     - Ouputs:
       -C_n (a matrix)
 =#
-calc_C_n(psi,theta,j) = (theta.-psi[j,3])*(theta.-psi[j,3])'
+calc_C_n(psi,theta,j::Int64) = (theta.-psi[j,3])*(theta.-psi[j,3])'
 
 #= This function iterates psi as desribed in Liu (2014) section 3
      - Inputs:
@@ -119,6 +121,8 @@ end
       -calc_epsilon()
 =#
 function expectation(psi,theta)
+  @assert length(theta[1,:])>1;
+  @assert length(theta[:,1])=length(psi[1,3][:]);
   epsilon = calc_epsilon(psi,theta);
   alpha_prime = zeros(length(psi[:,1]));
   for j in 1:length(psi[:,1])
@@ -146,6 +150,9 @@ end
       -calc_C_n()
 =#
 function maximization(psi,theta,w)
+  @assert length(theta[1,:])>1;
+  @assert length(theta[:,1])=length(psi[1,3][:]);
+  @assert length(w)=length(theta[:,1]);
   epsilon = calc_epsilon(psi,theta);
   x_prime = Array(Array,length(psi[:,1]));
   sig_prime = Array(Matrix,length(psi[:,1]));
@@ -179,7 +186,10 @@ end
        -maximization()
        -build_psi()
 =#
-function update_comp(theta,w,psi::Array{Any,2}) #add types
+function update_comp(theta,w,psi::Array{Any,2})
+  @assert length(theta[1,:])>1;
+  @assert length(theta[:,1])=length(psi[1,3][:]);
+  @assert length(w)=length(theta[:,1]);
   #Expectation
   alpha_prime = expectation(psi,theta);
   #Maximization
